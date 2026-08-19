@@ -1,10 +1,15 @@
 /* Set up our markdown converter */
-var converter = new showdown.Converter();
-converter.setOption("literalMidWordUnderscores", true);
-converter.setOption("tables", true);
-converter.setOption("tasklists", true);
-converter.setOption("metadata", true);
-converter.setOption("disableForced4SpacesIndentedSublists", true);
+const markdownConverter = async () => {
+
+    const converter = new showdown.Converter();
+    converter.setOption("literalMidWordUnderscores", true);
+    converter.setOption("tables", true);
+    converter.setOption("tasklists", true);
+    converter.setOption("metadata", true);
+    converter.setOption("disableForced4SpacesIndentedSublists", true);
+
+    return converter;
+};
 
 /* Functions to set light or dark mode */
 const setDisplayMode = wantDarkMode => {
@@ -157,6 +162,12 @@ const useBasicTables = () => {
 
 /* Function to do the conversion */
 const convertMarkdown = async () => {
+
+    converter = await markdownConverter();
+    if (!converter) {
+
+        return;
+    }
 
     // Convert any markdown blocks to HTML
     [...document.getElementsByClassName("markdown")].forEach(elem => {
