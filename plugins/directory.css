@@ -1,0 +1,8 @@
+/* Extra styling needed for directory listings */
+
+/* Make listing icons a reasonable size */
+p > img:has(+ a) {
+  width: 20px;
+  vertical-align: middle;
+  margin-right: 8px;
+}

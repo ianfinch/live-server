@@ -1,0 +1,4 @@
+{
+	"logLevel": 2,
+	"middleware": [ "__BASE__/middleware/index.js" ]
+}

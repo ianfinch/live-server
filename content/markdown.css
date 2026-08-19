@@ -1,0 +1,402 @@
+/* Light mode by default */
+:root {
+    --body-bg: #ededed;
+    --body-fg: #484848;
+    --article-width: 875px;
+    --article-padding-left: 32px;
+    --article-padding-right: 32px;
+    --article-bg: #fefefe;
+    --article-fg: var( --body-fg );
+    --article-fg-strong: #000017;
+    --article-border: #d0d0d0;
+    --heading-fg: var( --article-fg );
+    --pre-bg: rgb(245, 245, 245);
+    --pre-fg: rgb(54, 70, 78);
+    --link-fg: royalblue;
+    --link-hover-fg: firebrick;
+    --success-bg: #c6efce;
+    --success-fg: #006100;
+    --warning-bg: #ffeb9c;
+    --warning-fg:#9c5700;
+    --failure-bg: #ffc7ce;
+    --failure-fg:#9c0006;
+    --border-bg: #d7d7d7;
+    --table-header-bg: #ccc;
+    --table-header-fg: var( --heading-fg );
+    --text-file-bg: #002b36;
+    --text-file-fg: #93a1a1;
+    --text-file-font-size: 12px;
+    --menu-bg: powderblue;
+    --menu-fg: slategrey;
+    --menu-border: lightgrey;
+    --menu-hover-bg: darkturquoise;
+    --menu-hover-fg: white;
+    --menu-width: 140px;
+}
+
+/* Dark mode alternative */
+:has(body.dark-mode) {
+    --body-bg: #002b36;
+    --body-fg: #dcddde;
+    --article-bg: #203040;
+    --link-fg: rgb(153, 195, 255);
+    --link-hover-fg: rgb(255, 153, 195);
+    --article-fg-strong: #fff;
+    --article-border: #506070;
+    --pre-bg: #42444d;
+    --pre-fg: rgb(232, 232, 232);
+    --border-bg: #474747;
+    --table-header-bg: #2aa198;
+}
+
+/* Set margins for printing */
+@page {
+    size: a4 portrait;
+    margin: 0.5in 0.25in 0.5in 0.25in;
+}
+
+/* Handle printing */
+@media print {
+
+    body {
+        background: var( --article-bg ) !important;
+    }
+
+    body > article {
+        width: 210mm;
+        max-width: 210mm;
+        margin: 0 !important;
+    }
+}
+
+/* If there isn't room for the left margin to be reflected on the right side of
+   the article, switch to centring the article */
+@media only screen and (max-width: 1064px) and (min-width: 875px) {
+
+    .content {
+        padding-left: calc((100vw - var( --article-width ) - var( --article-padding-right ) - var( --article-padding-left )) / 2);
+    }
+
+    .sidebar {
+        display: none;
+    }
+}
+
+/* Once we get really narrow, just set margin */
+@media only screen and (max-width: 875px) {
+
+    .content {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    article {
+        width: calc(100vw - 16px) !important;
+    }
+}
+
+/* CSS reset */
+* { box-sizing: border-box; }
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p,
+blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img,
+ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i,
+center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption,
+tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section,
+summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+/* Style standard elements */
+body {
+  font-family: "Questrial", sans-serif;
+  font-optical-sizing: auto;
+  font-size: 16px;
+  line-height: 24px;
+  background: var( --body-bg );
+  color: var( --body-fg );
+}
+
+/* Container to keep everything together */
+.container {
+    display: flex;
+}
+
+/* The sidebar for navigation and directory listings */
+.sidebar {
+    width: 240px;
+    padding: 72px 0 16px 32px;
+}
+
+/* The main content area */
+.content {
+    padding: 16px 0 16px 32px;
+}
+
+/* Hide the first heading in the article, because we have duplicated it as the page title */
+article > h1:first-child {
+    display: none;
+}
+
+/* Mask for when we display a modal */
+div#mask {
+    background: #000000cc;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+}
+
+/* Display the mask when something has been expanded */
+div#mask:has(~ article .expanded) {
+    display: block;
+}
+
+/* Use article for formatting main content */
+article {
+    width: var( --article-width );
+    padding: 16px var( --article-padding-right ) 16px var( --article-padding-left );
+    background: var( --article-bg );
+    color: var( --article-fg );
+    border-style: solid;
+    border-color: var( --article-border );
+    border-width: 1px;
+    border-radius: 16px;
+}
+
+/* Special case, the article only contains a single pre block (typically from a text-based file) */
+body:has(> article > pre:only-child) {
+    background: var( --text-file-bg );
+}
+
+article:has(> pre:only-child) {
+    background: var( --text-file-bg );
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+    border: none;
+}
+
+article:has(> pre:only-child) pre {
+    background: var( --text-file-bg );
+    color: var( --text-file-fg );
+    overflow-x: unset;
+}
+article:has(> pre:only-child) code {
+    font-size: var( --text-file-font-size );
+    line-height: var( --text-file-font-size );
+}
+
+/* Style our headings */
+h1, h2, h3, h4 { font-family: "Quattrocento", serif; color: var( --heading-fg ); }
+h1 { font-size: 32px; line-height: 40px; font-weight: 400; margin-bottom: 16px; }
+h2 { font-size: 24px; line-height: 30px; font-weight: 400; margin-bottom: 16px; }
+h3 { font-size: 20px; line-height: 25px; font-weight: 400; margin-bottom: 16px; }
+
+p {
+  margin-bottom: 16px;
+}
+
+em, i { font-style: italic; }
+strong, b { font-weight: 700; color: var( --article-fg-strong ); }
+
+code {
+    font-family: "Courier New", monospace;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 14px;
+}
+
+p code, li code {
+    background: var( --pre-bg );
+    color: var( --pre-fg );
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+pre {
+    background: var( --pre-bg );
+    color: var( --pre-fg );
+    padding: 0.5em 1em;
+    margin-bottom: 16px;
+    max-width: calc( var( --article-width ) - 2 * 1em );
+    overflow-x: auto;
+}
+
+ul, ol {
+    list-style-position: outside;
+    margin-left: 2em;
+    margin-bottom: 1em;
+    position: relative;
+    max-width: 960px;
+}
+
+/* Leave space between numbered list items */
+ol > li {
+    margin-bottom: 8px;
+}
+
+/* Nested lists we don't want space below */
+li > ul, li > ol {
+    margin-bottom: 0;
+}
+
+/* Leave space above a numbered list inside an unordered list */
+li > ol {
+    margin-top: 8px;
+}
+
+/* Showdown can put in checkboxes for task lists. They have hard-coded -1.6em
+ * left margin which we can't override, so we need to adjust for it instead
+ */
+li.task-list-item:has(input[type=checkbox]) {
+    margin-left: 1.6em;
+}
+
+/* Keep images scaled to fit too */
+p:has(> img:only-child) {
+    max-width: calc( var( --article-width ) - 2 * 1em );
+    cursor: zoom-in;
+}
+
+p > img:only-child {
+    width: 100%;
+}
+
+a {
+  text-decoration: none;
+  color: var( --link-fg );
+  cursor: pointer;
+}
+a:hover {
+  color: var( --link-hover-fg );
+  text-decoration: underline;
+}
+
+hr {
+    margin-bottom: 1em;
+    border-style: solid;
+    border-width: 1px 0 0 0;
+    border-color: var( --border-bg );
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 40px;
+  margin-bottom: 1.5em;
+}
+
+table th, table td {
+  border: 1px solid var( --border-bg );
+  padding: 3px 8px;
+}
+
+table thead {
+    background: var( --table-header-bg );
+    color: var( --table-header-fg );
+    font-weight: bold;
+}
+
+/* Align formatting for gridjs */
+.injected-grid .gridjs-wrapper {
+    border-radius: 0;
+    margin-bottom: 1.5em;
+}
+
+.injected-grid .gridjs-th, .injected-grid .gridjs-td {
+    padding: 3px 8px;
+}
+
+.injected-grid .gridjs-th {
+    background-color: var( --table-header-bg );
+    color: var( --table-header-fg );
+    border-color: var( --border-bg );
+}
+
+.injected-grid .gridjs-th:hover {
+    background-color: #657b83;
+    color: white;
+}
+
+.injected-grid .gridjs-tbody {
+    background-color: transparent;
+}
+
+.injected-grid .gridjs-td {
+    background-color: transparent;
+    color: var( --article-fg );
+    border-color: var( --border-bg );
+}
+
+.injected-grid .gridjs-th .gridjs-resizable {
+    background-color: transparent;
+}
+
+.injected-grid .gridjs-th .gridjs-resizable:hover {
+    background-color: #9999cc99;
+}
+
+blockquote {
+    border-left: 0.25em solid var( --border-bg );
+    padding: 0 0 0 1em;
+}
+
+/* Mermaid diagrams we want a plain background */
+pre:has(> code.mermaid) {
+    background: var( --article-bg );
+    border: 1px solid var( --border-bg );
+    cursor: zoom-in;
+}
+
+/* Allow items to be expanded */
+p:has(> img.expanded:only-child),
+pre.expanded:has(> code.mermaid) {
+    cursor: zoom-out;
+    margin: 16px;
+    max-width: calc( 100% - 32px );
+    position: absolute;
+    left: 0;
+    z-index: 10;
+}
+
+/* Position the menu */
+div#menu {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    opacity: 0.01;
+}
+
+div#menu:hover {
+    opacity: 1;
+}
+
+div#menu > button {
+    display: block;
+    padding: 4px;
+    background: var( --menu-bg );
+    color: var( --menu-fg );
+    outline: inherit;
+    border: 1px solid var( --menu-border );
+    cursor: pointer;
+    width: var( --menu-width );
+}
+
+div#menu > button:hover {
+    background: var( --menu-hover-bg );
+    color: var( --menu-hover-fg );
+}
