@@ -6,6 +6,9 @@ const markdown = require("./markdown-handler");
 const fs = require("fs");
 const path = require("path");
 
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
+
 // Check the user has passed in a source and target directory
 if (process.argv.length !== 4 && process.argv.length !== 5) {
 
@@ -88,8 +91,23 @@ const processOutputFile = (content, sourceUrl, targetFile, depth) => {
         content = content.replace(/\/\)/g, "/_index_md.html)");
     }
 
-    // Write the file
-    fs.writeFileSync(targetFile, content);
+    // Use JSDOM to replace the markdown with HTML
+    const dom = new JSDOM(content, {
+        url: "file://" + path.resolve(targetFile),
+        resources: "usable",
+        runScripts: "dangerously"
+    });
+
+    // Wait for JSDOM to load the documents
+    dom.window.document.addEventListener("DOMContentLoaded", e => {
+
+        // Give some time for scripts to execute (NEED A BETTER WAY TO DO THIS)
+        setTimeout(() => {
+
+            // Write the file
+            fs.writeFileSync(targetFile, dom.serialize());
+        }, 1000);
+    });
 };
 
 // Functions to write the result from the markdown middleware
