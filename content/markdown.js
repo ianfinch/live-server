@@ -251,6 +251,21 @@ const updateModeButtonLabel = () => {
 /* Initialise the menu */
 const initMenu = () => {
 
+    // Create a menu
+    if (!document.getElementById("menu")) {
+
+        const menu = document.createElement("div");
+        menu.id = "menu";
+        document.getElementsByTagName("body")[0].appendChild(menu);
+
+        [ "light-dark", "tables", "plugins" ].forEach(id => {
+
+            const option = document.createElement("button");
+            option.id = id;
+            menu.appendChild(option);
+        });
+    }
+
     // Make the mode button work
     document.getElementById("light-dark").addEventListener("click", e => {
 
@@ -263,6 +278,7 @@ const initMenu = () => {
 
         updateModeButtonLabel();
     });
+    updateModeButtonLabel();
 
     // The tables button
     document.getElementById("tables").addEventListener("click", e => {
@@ -275,11 +291,10 @@ const initMenu = () => {
 
         updateTablesButtonLabel();
     });
-
-    // Set the labels on the buttons
     updateTablesButtonLabel();
+
+    // The plugins button
     updatePluginsButtonLabel();
-    updateModeButtonLabel();
 };
 
 // Trigger the conversion after the page has completed loading
