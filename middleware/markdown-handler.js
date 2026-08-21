@@ -98,10 +98,7 @@ const getFileContent = (res, filepath, rootDir, options) => {
         if (fs.lstatSync(filepath).isDirectory()) {
 
             const title = filepath.replace(rootDir, "");
-            return "---\n" +
-                   "css: /system/plugins/directory.css\n" +
-                   "---\n" +
-                   "# " + title + "\n" +
+            return "# " + title + "\n" +
                    getFilesInDirectory(filepath, rootDir) + "\n\n";
         }
 
@@ -137,6 +134,10 @@ const writeFileContent = (res, filepath, rootDir, options) => {
 
 // Actual middleware function
 module.exports = function(url, rootDir, res, next) {
+
+    // Grab any query string
+    const urlParams = new URLSearchParams(url.replace(/^.*?(\?|$)/, ""));
+    url = url.replace(/\?.*/, "");
 
     // Get the file extension
     const parsedUrl = path.parse(url);
@@ -185,6 +186,14 @@ module.exports = function(url, rootDir, res, next) {
     // If we don't have a final newline, add one
     if (escapedContent.substr(-1) !== "\n") {
         escapedContent = escapedContent + "\n";
+    }
+
+    // If this was a request for a raw response, we can just return the content now
+    if (urlParams.has("raw")) {
+
+        res.write(escapedContent);
+        res.end();
+        return;
     }
 
     // Take the first heading as the page title (or use the file path)

@@ -1,21 +1,3 @@
-/* Set up our markdown converter */
-const markdownConverter = async () => {
-
-    if (typeof showdown === "undefined") {
-
-        return null;
-    }
-
-    const converter = new showdown.Converter();
-    converter.setOption("literalMidWordUnderscores", true);
-    converter.setOption("tables", true);
-    converter.setOption("tasklists", true);
-    converter.setOption("metadata", true);
-    converter.setOption("disableForced4SpacesIndentedSublists", true);
-
-    return converter;
-};
-
 /* Functions to set light or dark mode */
 const setDisplayMode = wantDarkMode => {
 
@@ -166,13 +148,7 @@ const useBasicTables = () => {
 };
 
 /* Function to do the conversion */
-const convertMarkdown = async () => {
-
-    converter = await markdownConverter();
-    if (!converter) {
-
-        return;
-    }
+const convertMarkdown = async (converter) => {
 
     // Convert any markdown blocks to HTML
     [...document.getElementsByClassName("markdown")].forEach(elem => {
@@ -297,6 +273,26 @@ const initMenu = () => {
     updatePluginsButtonLabel();
 };
 
+// Populate the sidebar
+const populateSidebar = (converter) => {
+
+    // If the sidebar is already populated, we don't need to do anything
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar.textContent) {
+
+        return;
+    }
+
+    // Work out the directory. We know that we are working with either a
+    // markdown or HTML file, so we just need to remove filename.md or
+    // filename.html from the end of the URL
+    const directory = location.href.replace(/\/[^\/.]*\.(md|html)/, "/");
+    fetch(directory + "?raw")
+        .then(response => response.text())
+        .then(markdown => converter.makeHtml(markdown))
+        .then(html => { sidebar.innerHTML = html; });
+};
+
 // Trigger the conversion after the page has completed loading
 addEventListener("load", () => {
 
@@ -304,8 +300,23 @@ addEventListener("load", () => {
     // changes the body tag which sits outside the Markdown)
     setDarkMode();
 
-    // Do the markdown conversion
-    convertMarkdown();
+    // We use showdown to do the markdown conversion
+    if (typeof showdown !== "undefined") {
+
+        // Set up the converter
+        const converter = new showdown.Converter();
+        converter.setOption("literalMidWordUnderscores", true);
+        converter.setOption("tables", true);
+        converter.setOption("tasklists", true);
+        converter.setOption("metadata", true);
+        converter.setOption("disableForced4SpacesIndentedSublists", true);
+
+        // Do the markdown conversion
+        convertMarkdown(converter);
+
+        // Set up our sidebar
+        populateSidebar(converter);
+    }
 
     // Set up our menu
     initMenu();

@@ -77,7 +77,7 @@
         padding-left: calc((100vw - var( --article-width ) - var( --article-padding-right ) - var( --article-padding-left )) / 2);
     }
 
-    .sidebar {
+    #sidebar {
         display: none;
     }
 }
@@ -90,7 +90,7 @@
         padding-right: 8px !important;
     }
 
-    .sidebar {
+    #sidebar {
         display: none;
     }
 
@@ -127,14 +127,25 @@ body {
 }
 
 /* Container to keep everything together */
-.container {
+#container {
     display: flex;
 }
 
 /* The sidebar for navigation and directory listings */
-.sidebar {
+#sidebar {
     width: 240px;
     padding: 72px 0 16px 32px;
+}
+
+#sidebar h1 {
+  font-family: "Questrial", sans-serif;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 28px;
+  background: var( --table-header-bg );
+  color: var( --table-header-fg );
+  padding-left: 8px;
+  border-radius: 4px;
 }
 
 /* The main content area */
@@ -399,4 +410,11 @@ div#menu > button {
 div#menu > button:hover {
     background: var( --menu-hover-bg );
     color: var( --menu-hover-fg );
+}
+
+/* For directory listings, make icons a reasonable size */
+p > img:has(+ a) {
+  width: 20px;
+  vertical-align: middle;
+  margin-right: 8px;
 }
