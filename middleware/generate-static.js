@@ -104,11 +104,10 @@ const processOutputFile = (content, sourceUrl, targetFile, depth) => {
         // Give some time for scripts to execute (NEED A BETTER WAY TO DO THIS)
         setTimeout(() => {
 
-            // We can remove the markdown scripts from the page
+            // Remove any scripts we don't need
             [...dom.window.document.scripts].forEach(script => {
 
-                if (/\/system\/content\/markdown\.js$/.test(script.src) ||
-                    /\/system\/lib\/showdown\.min\.js$/.test(script.src)) {
+                if (/\/system\/lib\/showdown\.min\.js$/.test(script.src)) {
 
                     script.remove();
                 }

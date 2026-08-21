@@ -1,6 +1,11 @@
 /* Set up our markdown converter */
 const markdownConverter = async () => {
 
+    if (typeof showdown === "undefined") {
+
+        return null;
+    }
+
     const converter = new showdown.Converter();
     converter.setOption("literalMidWordUnderscores", true);
     converter.setOption("tables", true);
