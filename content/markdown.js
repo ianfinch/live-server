@@ -286,7 +286,7 @@ const populateSidebar = (converter) => {
     // Work out the directory. We know that we are working with either a
     // markdown or HTML file, so we just need to remove filename.md or
     // filename.html from the end of the URL
-    const directory = location.href.replace(/\/[^\/.]*\.(md|html)/, "/");
+    const directory = location.href.replace(/\/[^\/.]*\.(md|html)/, "");
     fetch(directory + "?raw")
         .then(response => response.text())
         .then(markdown => converter.makeHtml(markdown))
