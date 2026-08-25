@@ -161,22 +161,6 @@ const convertMarkdown = async (converter) => {
         handleFrontmatter(converter.getMetadata());
     });
 
-    // Update the title with the first h1 in the main content
-    const contentElems = document.getElementsByClassName("content");
-    if (contentElems.length > 0) {
-
-        const headers = contentElems[0].getElementsByTagName("h1");
-        if (headers.length > 0) {
-
-            const headerText = headers[0].textContent;
-            const title = document.getElementsByTagName("title");
-            if (title.length > 0) {
-    
-                title[0].textContent = headerText;
-            }
-        }
-    }
-
     // Add image expansion where needed
     [...document.querySelectorAll("p > img:only-child")].forEach(elem => {
         addExpandToggle(elem, elem.classList);
