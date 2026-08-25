@@ -314,6 +314,7 @@ addEventListener("load", () => {
         converter.setOption("tasklists", true);
         converter.setOption("metadata", true);
         converter.setOption("disableForced4SpacesIndentedSublists", true);
+        converter.setOption("ghCompatibleHeaderId", true);
 
         // Do the markdown conversion
         convertMarkdown(converter);
