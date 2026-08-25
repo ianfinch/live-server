@@ -277,6 +277,13 @@ const initMenu = () => {
     updatePluginsButtonLabel();
 };
 
+// Make all markdown headings one level deeper
+const increaseHeaderDepth = content => {
+
+    headingRegex = new RegExp(/^#/, "mg");
+    return content.replace(headingRegex, "##");
+};
+
 // Populate the sidebar
 const populateSidebar = (converter) => {
 
@@ -293,7 +300,7 @@ const populateSidebar = (converter) => {
     const directory = location.href.replace(/\/[^\/.]*\.(md|html)/, "");
     fetch(directory + "?raw")
         .then(response => response.text())
-        .then(markdown => converter.makeHtml(markdown))
+        .then(markdown => converter.makeHtml(increaseHeaderDepth(markdown)))
         .then(html => { sidebar.innerHTML = html; });
 };
 
