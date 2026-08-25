@@ -198,10 +198,11 @@ module.exports = function(url, rootDir, res, next) {
 
     // Take the first heading as the page title (or use the file path)
     const dirname = parsedUrl.dir + ( parsedUrl.dir === "/" ? "" : "/");
-    let pageTitle = fileContent.replace(/^[^#]*/, "").replace(/[\r\n].*/s, "");
-    if (/^# /.test(pageTitle)) {
+    const titleRegex = new RegExp("^#[^#].*", "m");
+    let pageTitle = fileContent.match(titleRegex);
+    if (pageTitle) {
 
-        pageTitle = pageTitle.substr(2);
+        pageTitle = pageTitle[0].substr(2);
     } else {
 
         pageTitle = dirname + filename;
