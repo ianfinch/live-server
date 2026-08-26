@@ -335,6 +335,30 @@ const populateSidebar = (converter) => {
         .then(html => { sidebar.innerHTML = html; });
 };
 
+// Make the sidebar toggle button work
+const initSidebarToggle = () => {
+
+    const toggle = document.getElementById("sidebar-toggle");
+    toggle.addEventListener("click", e => {
+
+        const sidebar = document.getElementById("sidebar-container");
+        if (sidebar.classList.contains("visible")) {
+
+            sidebar.classList.remove("visible");
+            sidebar.classList.add("closed");
+            toggle.textContent = "❯";
+        } else {
+
+            if (sidebar.classList.contains("closed")) {
+
+                sidebar.classList.remove("closed");
+            }
+            sidebar.classList.add("visible");
+            toggle.textContent = "❮";
+        }
+    });
+};
+
 // Trigger the conversion after the page has completed loading
 addEventListener("load", () => {
 
@@ -360,6 +384,9 @@ addEventListener("load", () => {
         // Set up our sidebar
         populateSidebar(converter);
     }
+
+    // Set up the button to slide the sidebar in and out
+    initSidebarToggle();
 
     // Set up our menu
     initMenu();

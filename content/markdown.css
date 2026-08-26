@@ -32,6 +32,11 @@
     --menu-hover-bg: darkturquoise;
     --menu-hover-fg: white;
     --menu-width: 140px;
+    --sidebar-width: 240px;
+    --sidebar-protruding: 16px;
+    --sidebar-buffer: 32px;
+    --sidebar-bounce: 16px;
+    --sidebar-bg: #d7d7d7;
 }
 
 /* Dark mode alternative */
@@ -47,6 +52,7 @@
     --pre-fg: rgb(232, 232, 232);
     --border-bg: #474747;
     --table-header-bg: #2aa198;
+    --sidebar-bg: #003c47;
 }
 
 /* Set margins for printing */
@@ -69,6 +75,15 @@
     }
 }
 
+/* If we have a wide enough screen to display the sidebar, we don't need the
+   sidebar toggle */
+@media only screen and (min-width: 1064px) {
+
+    #sidebar-toggle {
+        display: none;
+    }
+}
+
 /* If there isn't room for the left margin to be reflected on the right side of
    the article, switch to centring the article */
 @media only screen and (max-width: 1064px) and (min-width: 875px) {
@@ -77,8 +92,40 @@
         padding-left: calc((100vw - var( --article-width ) - var( --article-padding-right ) - var( --article-padding-left )) / 2);
     }
 
+    #sidebar-container {
+        position: absolute;
+        top: 0;
+        left: calc( -1 * var( --sidebar-width ) - var( --sidebar-buffer ) + var( --sidebar-protruding ));
+        width: calc( var( --sidebar-width ) + var( --sidebar-buffer ));
+        background: var( --sidebar-bg );
+        height: 100vh;
+        border-style: solid;
+        border-width: 0 1px 0 0;
+        border-color: var( --article-border );
+        box-shadow: 0 0 16px black;
+        z-index: 30;
+    }
+
+    #sidebar-container.visible {
+        left: calc( -1 * var( --sidebar-buffer ));
+        animation-name: sidebar-open;
+        animation-duration: 0.5s;
+    }
+    
+    #sidebar-container.closed {
+        left: calc( -1 * var( --sidebar-width ) - var( --sidebar-buffer ) + var( --sidebar-protruding ));
+        animation-name: sidebar-close;
+        animation-duration: 0.5s;
+    }
+
+    #sidebar-container.visible #sidebar-toggle {
+        right: 16px;
+    }
+
     #sidebar {
-        display: none;
+        margin-left: var( --sidebar-buffer );
+        padding-left: 16px !important;
+        padding-right: 16px !important;
     }
 }
 
@@ -90,7 +137,7 @@
         padding-right: 8px !important;
     }
 
-    #sidebar {
+    #sidebar-container {
         display: none;
     }
 
@@ -133,19 +180,49 @@ body {
 
 /* The sidebar for navigation and directory listings */
 #sidebar {
-    width: 240px;
+    width: var( --sidebar-width );
     padding: 72px 0 16px 32px;
 }
 
 #sidebar h2 {
-  font-family: "Questrial", sans-serif;
-  font-weight: bold;
-  font-size: 18px;
-  line-height: 28px;
-  background: var( --table-header-bg );
-  color: var( --table-header-fg );
-  padding-left: 8px;
-  border-radius: 4px;
+    font-family: "Questrial", sans-serif;
+    font-weight: bold;
+    font-size: 18px;
+    line-height: 28px;
+    background: var( --table-header-bg );
+    color: var( --table-header-fg );
+    padding-left: 8px;
+    border-radius: 4px;
+}
+
+#sidebar-toggle {
+    position: absolute;
+    top: 4px;
+    right: 1px;
+    border: none;
+    background: var( --sidebar-bg );
+    color: var( --body-fg );
+    padding: 0px;
+    font-size: 14px;
+    line-height: 32px;
+    cursor: pointer;
+}
+
+/* Animation for the sidebar */
+@keyframes sidebar-open {
+    0% { left: calc( -1 * var( --sidebar-width ) - var( --sidebar-buffer ) + var( --sidebar-protruding )); }
+    40% { left: calc( -1 * var( --sidebar-width ) - var( --sidebar-buffer ) + var( --sidebar-protruding ) - var( --sidebar-bounce )); }
+    60% { left: calc( -1 * var( --sidebar-buffer )); }
+    65% { left: calc( -1 * var( --sidebar-buffer ) + var( --sidebar-bounce )); }
+    100% { left: calc( -1 * var( --sidebar-buffer )); }
+}
+
+@keyframes sidebar-close {
+    0% { left: calc( -1 * var( --sidebar-buffer )); }
+    40% { left: calc( -1 * var( --sidebar-buffer ) + var( --sidebar-bounce )); }
+    60% { left: calc( -1 * var( --sidebar-width ) - var( --sidebar-buffer ) + var( --sidebar-protruding )); }
+    65% { left: calc( -1 * var( --sidebar-width ) - var( --sidebar-buffer ) + var( --sidebar-protruding ) - var( --sidebar-bounce )); }
+    100% { left: calc( -1 * var( --sidebar-width ) - var( --sidebar-buffer ) + var( --sidebar-protruding )); }
 }
 
 /* The main content area */
