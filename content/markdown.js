@@ -268,6 +268,35 @@ const increaseHeaderDepth = content => {
     return content.replace(headingRegex, "##");
 };
 
+// Move a section into a new parent element
+// It takes an element ID and a target element to move it under. It moves all
+// elements from the one with that ID up to the next element with the same tag.
+// For example if the element with that ID is an h2 heading, it will move
+// everything up to the next h2 heading
+const moveSection = (id, target) => {
+
+    // Make sure we find an element to copy
+    let elem = document.getElementById(id);
+    if (elem === null) {
+
+        target.innerHTML = "<h2>Error</h2><p>Cannot find element with ID of " + id + "</p>";
+        return;
+    }
+
+    // If we've got a match, walk through the siblings until we hit another of
+    // the same tag (or run out of elements)
+    // Because we are moving elements around, we need to find the next sibling
+    // before we move the current element (otherwise we won't find a next
+    // sibling if we check after we've moved it)
+    const tagName = elem.nodeName;
+    let nextElem;
+    do {
+        nextElem = elem.nextSibling;
+        target.appendChild(elem);
+        elem = nextElem;
+    } while (nextElem !== null && nextElem.nodeName !== tagName);
+};
+
 // Populate the sidebar
 const populateSidebar = (converter) => {
 
@@ -276,6 +305,24 @@ const populateSidebar = (converter) => {
     if (sidebar.textContent) {
 
         return;
+    }
+
+    // Check whether the front matter wants us to do anything with the sidebar
+    const frontmatter = converter.getMetadata();
+    if (frontmatter.sidebar) {
+
+        // Are we hiding the sidebar?
+        if (frontmatter.sidebar === "none") {
+
+            return;
+        }
+
+        // If we start with a hash, look in the content for something with that ID
+        if (frontmatter.sidebar.substr(0, 1) === "#") {
+
+            moveSection(frontmatter.sidebar.substr(1), sidebar);
+            return;
+        }
     }
 
     // Work out the directory. We know that we are working with either a
