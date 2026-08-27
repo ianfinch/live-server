@@ -98,7 +98,7 @@
         left: calc( -1 * var( --sidebar-width ) - var( --sidebar-buffer ) + var( --sidebar-protruding ));
         width: calc( var( --sidebar-width ) + var( --sidebar-buffer ));
         background: var( --sidebar-bg );
-        height: 100vh;
+        min-height: 100vh;
         border-style: solid;
         border-width: 0 1px 0 0;
         border-color: var( --article-border );
@@ -206,6 +206,11 @@ body {
     font-size: 14px;
     line-height: 32px;
     cursor: pointer;
+}
+
+/* Hide the sidebar if it has nothing in it */
+#sidebar-container:has(#sidebar:empty) {
+    display: none;
 }
 
 /* Animation for the sidebar */

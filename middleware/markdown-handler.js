@@ -98,7 +98,10 @@ const getFileContent = (res, filepath, rootDir, options) => {
         if (fs.lstatSync(filepath).isDirectory()) {
 
             const title = filepath.replace(rootDir, "");
-            return "# " + title + "\n" +
+            return "---\n" +
+                   "sidebar: none\n" +
+                   "---\n" +
+                   "# " + title + "\n" +
                    getFilesInDirectory(filepath, rootDir) + "\n\n";
         }
 
