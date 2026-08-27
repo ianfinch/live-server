@@ -314,25 +314,41 @@ const populateSidebar = (converter) => {
         // Are we hiding the sidebar?
         if (frontmatter.sidebar === "none") {
 
-            return;
-        }
+            // Do nothing
 
         // If we start with a hash, look in the content for something with that ID
-        if (frontmatter.sidebar.substr(0, 1) === "#") {
+        } else if (frontmatter.sidebar.substr(0, 1) === "#") {
 
             moveSection(frontmatter.sidebar.substr(1), sidebar);
-            return;
-        }
-    }
 
-    // Work out the directory. We know that we are working with either a
-    // markdown or HTML file, so we just need to remove filename.md or
-    // filename.html from the end of the URL
-    const directory = location.href.replace(/\/[^\/.]*\.(md|html)/, "");
-    fetch(directory + "?raw")
-        .then(response => response.text())
-        .then(markdown => converter.makeHtml(increaseHeaderDepth(markdown)))
-        .then(html => { sidebar.innerHTML = html; });
+        // If it starts with a dot, it's a file we need to load
+        } else if (frontmatter.sidebar.substr(0, 1) === ".") {
+
+            const url = new URL(frontmatter.sidebar, location.href).toString() + "?raw";
+            fetch(url)
+                .then(response => response.text())
+                .then(markdown => converter.makeHtml(markdown))
+                .then(html => { sidebar.innerHTML = html; })
+                .catch(err => { sidebar.innerHTML = "<h2>Error</h2><p>" + err + "</p>"; });
+
+        // Anything else, put it directly into the sidebar as text
+        } else {
+
+            sidebar.textContent = frontmatter.sidebar;
+        }
+
+    // If the front matter doesn't specify any sidebar content, we will use the
+    // directory. We know that we are working with either a markdown or HTML
+    // file, so we just need to remove filename.md or filename.html from the
+    // end of the URL
+    } else {
+
+        const directory = location.href.replace(/\/[^\/.]*\.(md|html)/, "");
+        fetch(directory + "?raw")
+            .then(response => response.text())
+            .then(markdown => converter.makeHtml(increaseHeaderDepth(markdown)))
+            .then(html => { sidebar.innerHTML = html; });
+    }
 };
 
 // Make the sidebar toggle button work
