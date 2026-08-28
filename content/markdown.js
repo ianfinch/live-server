@@ -251,7 +251,7 @@ const initMenu = () => {
         // Somewhere to add the options
         const menuOptions = document.createElement("div");
         menu.appendChild(menuOptions);
-        document.getElementsByTagName("body")[0].appendChild(menu);
+        document.getElementsByClassName("content")[0].appendChild(menu);
 
         // Add in the options
         [ "light-dark", "tables", "plugins" ].forEach(id => {
@@ -270,9 +270,11 @@ const initMenu = () => {
         if (menu.classList.contains("is-active")) {
 
             menu.classList.remove("is-active");
+            menuButton.textContent = "☰";
         } else {
 
             menu.classList.add("is-active");
+            menuButton.textContent = "🗙";
         }
     });
 
@@ -287,6 +289,7 @@ const initMenu = () => {
         }
 
         menu.classList.remove("is-active");
+        menuButton.textContent = "☰";
         updateModeButtonLabel();
     });
     updateModeButtonLabel();
@@ -301,6 +304,7 @@ const initMenu = () => {
         }
 
         menu.classList.remove("is-active");
+        menuButton.textContent = "☰";
         updateTablesButtonLabel();
     });
     updateTablesButtonLabel();

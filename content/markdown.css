@@ -233,6 +233,7 @@ body {
 /* The main content area */
 .content {
     padding: 16px 0 16px 32px;
+    position: relative;
 }
 
 /* Hide the first heading in the article, because we have duplicated it as the page title */
@@ -468,7 +469,7 @@ pre.expanded:has(> code.mermaid) {
 
 /* Position the menu */
 div#menu {
-    position: fixed;
+    position: absolute;
     top: 8px;
     right: 8px;
     text-align: right;
@@ -487,6 +488,7 @@ div#menu > button {
     background: inherit;
     color: inherit;
     font-size: 24px;
+    line-height: 24px;
 }
 
 div#menu > div {
@@ -495,6 +497,17 @@ div#menu > div {
 
 div#menu.is-active > div {
     display: block;
+}
+
+div#menu.is-active > button {
+    background: var( --menu-bg );
+    color: var( --menu-fg );
+    border: 1px solid var( --menu-border );
+}
+
+div#menu.is-active > button:hover {
+    background: var( --menu-hover-bg );
+    color: var( --menu-hover-fg );
 }
 
 div#menu > div > button {
