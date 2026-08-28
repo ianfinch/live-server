@@ -80,7 +80,7 @@ const addScript = jsFile => {
 };
 
 /* Function to handle frontmatter */
-const handleFrontmatter = frontmatter => {
+const injectFrontmatterImports = frontmatter => {
 
     if (frontmatter.css) {
         frontmatter.css.split(/, */).forEach(cssFile => {
@@ -93,6 +93,25 @@ const handleFrontmatter = frontmatter => {
             addScript(jsFile);
         });
     }
+};
+
+/*
+ * Function to insert variables from fontmatter into the page
+    * Variables are defined in the frontmatter as vars.<key>: <value>
+    * Insertion into the content is indicated by {% <key> %}
+    */
+const injectFrontmatterVariables = (content, frontmatter) => {
+
+    Object.keys(frontmatter).forEach(key => {
+
+        if (/^vars\./.test(key)) {
+
+            const regex = new RegExp("{% *" + key.substr(5) + " *%}", "g");
+            content = content.replace(regex, frontmatter[key]);
+        }
+    });
+
+    return content;
 };
 
 /* Function to replace standard tables with gridjs */
@@ -155,10 +174,12 @@ const convertMarkdown = async (converter) => {
 
         const text = elem.textContent.replace(/(```[a-z]+) +/g, "$1");
         const html = converter.makeHtml(text);
-        elem.insertAdjacentHTML("afterend", "<article>" + html + "</article>");
+        const frontmatter = converter.getMetadata();
+        const htmlWithVars = injectFrontmatterVariables(html, frontmatter);
+        elem.insertAdjacentHTML("afterend", "<article>" + htmlWithVars + "</article>");
         elem.remove();
 
-        handleFrontmatter(converter.getMetadata());
+        injectFrontmatterImports(frontmatter);
     });
 
     // Add image expansion where needed
