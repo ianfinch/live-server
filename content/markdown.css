@@ -471,25 +471,40 @@ div#menu {
     position: fixed;
     top: 8px;
     right: 8px;
-    opacity: 0.01;
+    text-align: right;
 }
 
-div#menu:hover {
-    opacity: 1;
+div#menu button {
+    display: block;
+    padding: 4px;
+    outline: inherit;
+    cursor: pointer;
 }
 
 div#menu > button {
+    display: inline-block;
+    border: none;
+    background: inherit;
+    color: inherit;
+    font-size: 24px;
+}
+
+div#menu > div {
+    display: none;
+}
+
+div#menu.is-active > div {
     display: block;
-    padding: 4px;
+}
+
+div#menu > div > button {
     background: var( --menu-bg );
     color: var( --menu-fg );
-    outline: inherit;
     border: 1px solid var( --menu-border );
-    cursor: pointer;
     width: var( --menu-width );
 }
 
-div#menu > button:hover {
+div#menu > div > button:hover {
     background: var( --menu-hover-bg );
     color: var( --menu-hover-fg );
 }

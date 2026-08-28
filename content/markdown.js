@@ -239,17 +239,42 @@ const initMenu = () => {
     // Create a menu
     if (!document.getElementById("menu")) {
 
+        // The overall menu container
         const menu = document.createElement("div");
         menu.id = "menu";
+
+        // The menu button
+        const menuButton = document.createElement("button");
+        menuButton.textContent = "☰";
+        menu.appendChild(menuButton);
+
+        // Somewhere to add the options
+        const menuOptions = document.createElement("div");
+        menu.appendChild(menuOptions);
         document.getElementsByTagName("body")[0].appendChild(menu);
 
+        // Add in the options
         [ "light-dark", "tables", "plugins" ].forEach(id => {
 
             const option = document.createElement("button");
             option.id = id;
-            menu.appendChild(option);
+            menuOptions.appendChild(option);
         });
     }
+
+    // Make the menu itself work
+    const menu = document.getElementById("menu");
+    const menuButton = menu.getElementsByTagName("button")[0];
+    menuButton.addEventListener("click", e => {
+
+        if (menu.classList.contains("is-active")) {
+
+            menu.classList.remove("is-active");
+        } else {
+
+            menu.classList.add("is-active");
+        }
+    });
 
     // Make the mode button work
     document.getElementById("light-dark").addEventListener("click", e => {
@@ -261,6 +286,7 @@ const initMenu = () => {
             setDarkMode();
         }
 
+        menu.classList.remove("is-active");
         updateModeButtonLabel();
     });
     updateModeButtonLabel();
@@ -274,6 +300,7 @@ const initMenu = () => {
             useBasicTables();
         }
 
+        menu.classList.remove("is-active");
         updateTablesButtonLabel();
     });
     updateTablesButtonLabel();
