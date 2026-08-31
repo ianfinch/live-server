@@ -5,6 +5,56 @@ const settings = {
     "enhanced-tables": false
 };
 
+/* A function to allow plugins to register for actions after markdown
+ * conversion is complete
+ */
+let conversionComplete = false;
+const registeredPlugins = [];
+window.registerPluginCallback = fn => {
+
+    if (conversionComplete) {
+
+        fn();
+    } else {
+
+        registeredPlugins.push(fn);
+    }
+};
+
+/*
+ * When we load a plugin, we may need to delay until all its dependencies are loaded.
+ * The parameter dependencyCheck is the function to check the dependency, and it
+ * should return true or false
+ */
+window.waitForDependency = (dependencyCheck, remainingAttempts = 5) => {
+
+    // How long we sleep for
+    const sleepMillis = 25;
+
+    // Create a sleep function here, so we don't clutter up the namespace
+    const sleep = (delay) => {
+        return new Promise((resolve) => {
+            setTimeout(() => { resolve(null); }, delay);
+        });
+    };
+
+    // Check we still have attempts left
+    if (remainingAttempts === 0) {
+
+        return Promise.resolve(false);
+    }
+
+    // Check the dependency
+    if (dependencyCheck()) {
+
+        return Promise.resolve(true);
+    }
+
+    // Sleep, then try again
+    return sleep(sleepMillis)
+            .then( () => waitForDependency(remainingAttempts - 1) );
+};
+
 /* Functions to set light or dark mode */
 const setDisplayMode = wantDarkMode => {
 
@@ -213,9 +263,6 @@ const convertMarkdown = async (converter) => {
             addExpandToggle(diagram, classes);
         }
     });
-
-    // Publish an event to allow post-conversion activities
-    window.dispatchEvent(new Event("markdownConverted"));
 };
 
 /* Set the legend on the enhanced tables button */
@@ -464,4 +511,11 @@ addEventListener("load", () => {
 
     // Set up our menu
     initMenu();
+
+    // Look for any plugins we need to initialise
+    conversionComplete = true;
+    registeredPlugins.forEach(fn => {
+
+        fn();
+    });
 });
