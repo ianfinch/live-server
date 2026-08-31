@@ -1,3 +1,10 @@
+/* Settings for this site */
+const settings = {
+
+    "dark-mode": true,
+    "enhanced-tables": false
+};
+
 /* Functions to set light or dark mode */
 const setDisplayMode = wantDarkMode => {
 
@@ -69,6 +76,13 @@ const addStyleSheet = cssFile => {
 
 /* Function to add a script to the page */
 const addScript = jsFile => {
+
+    // Check that script is local
+    if (!/^(\/|\.)/.test(jsFile)) {
+
+        alert("Cannot import an external script: " + jsFile);
+        return;
+    }
 
     const script = createElement("script")
                     .addAttribute("src", jsFile)
@@ -218,13 +232,6 @@ const updateTablesButtonLabel = () => {
     tablesButton.textContent = usingEnhancedTables ? "Basic tables" : "Enhanced tables";
 };
 
-/* Set the legend on the plugin enablement button */
-const updatePluginsButtonLabel = () => {
-
-    const pluginsButton = document.getElementById("plugins");
-    pluginsButton.textContent = "Enable plugins";
-};
-
 /* Set the legend on the light/dark mode button */
 const updateModeButtonLabel = () => {
 
@@ -254,7 +261,7 @@ const initMenu = () => {
         document.getElementsByClassName("content")[0].appendChild(menu);
 
         // Add in the options
-        [ "light-dark", "tables", "plugins" ].forEach(id => {
+        [ "light-dark", "tables" ].forEach(id => {
 
             const option = document.createElement("button");
             option.id = id;
@@ -308,9 +315,6 @@ const initMenu = () => {
         updateTablesButtonLabel();
     });
     updateTablesButtonLabel();
-
-    // The plugins button
-    updatePluginsButtonLabel();
 };
 
 // Make all markdown headings one level deeper
@@ -430,9 +434,11 @@ const initSidebarToggle = () => {
 // Trigger the conversion after the page has completed loading
 addEventListener("load", () => {
 
-    // Let's use dark mode by default (we can do this immediately because it
-    // changes the body tag which sits outside the Markdown)
-    setDarkMode();
+    // Check whether we need to start with dark mode
+    if (settings["dark-mode"]) {
+
+        setDarkMode();
+    }
 
     // We use showdown to do the markdown conversion
     if (typeof showdown !== "undefined") {
