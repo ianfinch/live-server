@@ -115,7 +115,7 @@ const useBasicTables = () => {
 };
 
 /* Function to do the conversion */
-const addMarkdownEnhancements = async (converter) => {
+const addMarkdownEnhancements = async () => {
 
     // Add image expansion where needed
     [...document.querySelectorAll("p > img:only-child")].forEach(elem => {
@@ -136,7 +136,9 @@ const addMarkdownEnhancements = async (converter) => {
     });
 };
 
-/* Set the legend on the enhanced tables button */
+/*
+ * Set the legend on the enhanced tables button
+ */
 const updateTablesButtonLabel = () => {
 
     const tablesButton = document.getElementById("tables");
@@ -150,7 +152,9 @@ const updateTablesButtonLabel = () => {
     tablesButton.textContent = usingEnhancedTables ? "Basic tables" : "Enhanced tables";
 };
 
-/* Set the legend on the light/dark mode button */
+/* 
+ * Set the legend on the light/dark mode button
+ */
 const updateModeButtonLabel = () => {
 
     const modeButton = document.getElementById("light-dark");
@@ -158,7 +162,9 @@ const updateModeButtonLabel = () => {
     modeButton.textContent = inDarkMode ? "Light mode" : "Dark mode";
 };
 
-/* Initialise the menu */
+/*
+ * Initialise the menu
+ */
 const initMenu = () => {
 
     // Create a menu
@@ -235,7 +241,9 @@ const initMenu = () => {
     updateTablesButtonLabel();
 };
 
-// Make the sidebar toggle button work
+/*
+ * Make the sidebar toggle button work
+ */
 const initSidebarToggle = () => {
 
     const toggle = document.getElementById("sidebar-toggle");
@@ -259,7 +267,9 @@ const initSidebarToggle = () => {
     });
 };
 
-// Trigger the conversion after the page has completed loading
+/*
+ * Trigger the conversion after the page has completed loading
+ */
 addEventListener("load", () => {
 
     // Check whether we need to start with dark mode
@@ -269,7 +279,7 @@ addEventListener("load", () => {
     }
 
     // Dynamic content
-    addMarkdownEnhancements(converter);
+    addMarkdownEnhancements();
 
     // Set up the button to slide the sidebar in and out
     initSidebarToggle();
