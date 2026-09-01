@@ -239,11 +239,10 @@ const convertMarkdown = async (converter) => {
         const text = elem.textContent.replace(/(```[a-z]+) +/g, "$1");
         const html = converter.makeHtml(text);
         const frontmatter = converter.getMetadata();
+        injectFrontmatterImports(frontmatter);
         const htmlWithVars = injectFrontmatterVariables(html, frontmatter);
         elem.insertAdjacentHTML("afterend", "<article>" + htmlWithVars + "</article>");
         elem.remove();
-
-        injectFrontmatterImports(frontmatter);
     });
 
     // Add image expansion where needed

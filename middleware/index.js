@@ -2,7 +2,7 @@
  * Middleware so I can use non-web files from live-server
  */
 
-const handler = require("./markdown-handler");
+const handler = require("./orchestrator");
 
 module.exports = function(req, res, next) {
 
