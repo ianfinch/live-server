@@ -7,7 +7,7 @@ const path = require("node:path");
 const systemDir = __dirname.replace(path.sep + "middleware", "");
 
 const convertMarkdown = require("./markdown");
-const createDirectoryListing = require("./directory");
+const getFileContent = require("./file-loader");
 
 // List of file extensions to pass through unchanged
 const passThrough = [
@@ -32,26 +32,6 @@ const mime = {
     js:   "text/javascript",
     mjs:  "text/javascript",
     svg:  "image/svg+xml"
-};
-
-// Get the content of a file (this assumes we've already checked that the file
-// exists)
-const getFileContent = (res, filepath, rootDir, options) => {
-
-        // Check whether this is a directory
-        if (fs.lstatSync(filepath).isDirectory()) {
-
-            return createDirectoryListing(filepath, rootDir);
-        }
-
-        // Check for a binary file
-        if (options && options.binary) {
-
-            return fs.readFileSync(filepath, { flag: "r" });
-        }
-
-        // Assume we have text file format
-        return fs.readFileSync(filepath, { encoding: "utf8", flag: "r" });
 };
 
 // Write the content of a file to the response
@@ -83,14 +63,14 @@ module.exports = function(url, rootDir, res, next) {
         filepath = filepath.replace(/^\/system\/plugins\//, systemDir + path.sep + "plugins" + path.sep);
         filepath = filepath.replace(/^\/plugins\//, rootDir + path.sep + "plugins" + path.sep);
         res.setHeader("Content-Type", mime[extension] || "text/plain");
-        writeContent(getFileContent(res, filepath, rootDir), res);
+        writeContent(getFileContent(filepath, rootDir), res);
         return;
     }
 
     // Check for favicon
     if (url === "/favicon.ico") {
         const filepath = systemDir + path.sep + "content" + path.sep + "favicon.ico";
-        writeContent(getFileContent(res, filepath, rootDir), res);
+        writeContent(getFileContent(filepath, rootDir, { binary: true }), res);
         return;
     }
 
@@ -102,8 +82,9 @@ module.exports = function(url, rootDir, res, next) {
         return
     }
 
-    // Make sure the file exists
-    if (!fs.existsSync(filepath)) {
+    // Get the content for this page
+    const fileContent = getFileContent(filepath, rootDir);
+    if (!fileContent) {
 
         console.error("ERROR File not found: " + filepath);
         res.statusCode = 404;
@@ -111,9 +92,6 @@ module.exports = function(url, rootDir, res, next) {
         res.end();
         return;
     }
-
-    // Get the content for this page
-    const fileContent = getFileContent(res, filepath, rootDir);
 
     // If this was a request for a raw response, we can just return the content now
     if (urlParams.has("raw")) {
@@ -123,6 +101,6 @@ module.exports = function(url, rootDir, res, next) {
     }
 
     // Convert the markdown to HTML and send that
-    const convertedContent = convertMarkdown(fileContent, parsedUrl);
+    const convertedContent = convertMarkdown(fileContent, parsedUrl, filepath, rootDir);
     writeContent(convertedContent, res);
 }

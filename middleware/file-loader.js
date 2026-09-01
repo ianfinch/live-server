@@ -63,4 +63,31 @@ const createDirectoryListing = (dirpath, rootDir) => {
            getFilesInDirectory(dirpath, rootDir) + "\n\n";
 };
 
-module.exports = createDirectoryListing;
+/*
+ * Get the content of a file
+ */
+const getFileContent = (filepath, rootDir, options) => {
+
+    // Make sure the file exists
+    if (!fs.existsSync(filepath)) {
+
+        return null;
+    }
+
+    // Check whether this is a directory
+    if (fs.lstatSync(filepath).isDirectory()) {
+
+        return createDirectoryListing(filepath, rootDir);
+    }
+
+    // Check for a binary file
+    if (options && options.binary) {
+
+        return fs.readFileSync(filepath, { flag: "r" });
+    }
+
+    // Assume we have text file format
+    return fs.readFileSync(filepath, { encoding: "utf8", flag: "r" });
+};
+
+module.exports = getFileContent;

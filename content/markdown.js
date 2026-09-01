@@ -5,56 +5,6 @@ const settings = {
     "enhanced-tables": false
 };
 
-/* A function to allow plugins to register for actions after markdown
- * conversion is complete
- */
-let conversionComplete = false;
-const registeredPlugins = [];
-window.registerPluginCallback = fn => {
-
-    if (conversionComplete) {
-
-        fn();
-    } else {
-
-        registeredPlugins.push(fn);
-    }
-};
-
-/*
- * When we load a plugin, we may need to delay until all its dependencies are loaded.
- * The parameter dependencyCheck is the function to check the dependency, and it
- * should return true or false
- */
-window.waitForDependency = (dependencyCheck, remainingAttempts = 5) => {
-
-    // How long we sleep for
-    const sleepMillis = 25;
-
-    // Create a sleep function here, so we don't clutter up the namespace
-    const sleep = (delay) => {
-        return new Promise((resolve) => {
-            setTimeout(() => { resolve(null); }, delay);
-        });
-    };
-
-    // Check we still have attempts left
-    if (remainingAttempts === 0) {
-
-        return Promise.resolve(false);
-    }
-
-    // Check the dependency
-    if (dependencyCheck()) {
-
-        return Promise.resolve(true);
-    }
-
-    // Sleep, then try again
-    return sleep(sleepMillis)
-            .then( () => waitForDependency(remainingAttempts - 1) );
-};
-
 /* Functions to set light or dark mode */
 const setDisplayMode = wantDarkMode => {
 
@@ -112,72 +62,6 @@ const createElement = name => {
     return result;
 };
 
-/* Function to add a stylesheet to the page */
-const addStyleSheet = cssFile => {
-
-    const link = createElement("link")
-                    .addAttribute("href", cssFile)
-                    .addAttribute("rel", "stylesheet")
-                    .addAttribute("type", "text/css")
-                    .value;
-    const head = document.getElementsByTagName("head")[0];
-    head.appendChild(link);
-};
-
-/* Function to add a script to the page */
-const addScript = jsFile => {
-
-    // Check that script is local
-    if (!/^(\/|\.)/.test(jsFile)) {
-
-        alert("Cannot import an external script: " + jsFile);
-        return;
-    }
-
-    const script = createElement("script")
-                    .addAttribute("src", jsFile)
-                    .addAttribute("type", "text/javascript")
-                    .addAttribute("charset", "utf-8")
-                    .value;
-    const head = document.getElementsByTagName("head")[0];
-    head.appendChild(script);
-};
-
-/* Function to handle frontmatter */
-const injectFrontmatterImports = frontmatter => {
-
-    if (frontmatter.css) {
-        frontmatter.css.split(/, */).forEach(cssFile => {
-            addStyleSheet(cssFile);
-        });
-    }
-
-    if (frontmatter.js) {
-        frontmatter.js.split(/, */).forEach(jsFile => {
-            addScript(jsFile);
-        });
-    }
-};
-
-/*
- * Function to insert variables from fontmatter into the page
-    * Variables are defined in the frontmatter as vars.<key>: <value>
-    * Insertion into the content is indicated by {% <key> %}
-    */
-const injectFrontmatterVariables = (content, frontmatter) => {
-
-    Object.keys(frontmatter).forEach(key => {
-
-        if (/^vars\./.test(key)) {
-
-            const regex = new RegExp("{% *" + key.substr(5) + " *%}", "g");
-            content = content.replace(regex, frontmatter[key]);
-        }
-    });
-
-    return content;
-};
-
 /* Function to replace standard tables with gridjs */
 const useEnhancedTables = () => {
 
@@ -231,19 +115,7 @@ const useBasicTables = () => {
 };
 
 /* Function to do the conversion */
-const convertMarkdown = async (converter) => {
-
-    // Convert any markdown blocks to HTML
-    [...document.getElementsByClassName("markdown")].forEach(elem => {
-
-        const text = elem.textContent.replace(/(```[a-z]+) +/g, "$1");
-        const html = converter.makeHtml(text);
-        const frontmatter = converter.getMetadata();
-        injectFrontmatterImports(frontmatter);
-        const htmlWithVars = injectFrontmatterVariables(html, frontmatter);
-        elem.insertAdjacentHTML("afterend", "<article>" + htmlWithVars + "</article>");
-        elem.remove();
-    });
+const addMarkdownEnhancements = async (converter) => {
 
     // Add image expansion where needed
     [...document.querySelectorAll("p > img:only-child")].forEach(elem => {
@@ -363,96 +235,6 @@ const initMenu = () => {
     updateTablesButtonLabel();
 };
 
-// Make all markdown headings one level deeper
-const increaseHeaderDepth = content => {
-
-    headingRegex = new RegExp(/^#/, "mg");
-    return content.replace(headingRegex, "##");
-};
-
-// Move a section into a new parent element
-// It takes an element ID and a target element to move it under. It moves all
-// elements from the one with that ID up to the next element with the same tag.
-// For example if the element with that ID is an h2 heading, it will move
-// everything up to the next h2 heading
-const moveSection = (id, target) => {
-
-    // Make sure we find an element to copy
-    let elem = document.getElementById(id);
-    if (elem === null) {
-
-        target.innerHTML = "<h2>Error</h2><p>Cannot find element with ID of " + id + "</p>";
-        return;
-    }
-
-    // If we've got a match, walk through the siblings until we hit another of
-    // the same tag (or run out of elements)
-    // Because we are moving elements around, we need to find the next sibling
-    // before we move the current element (otherwise we won't find a next
-    // sibling if we check after we've moved it)
-    const tagName = elem.nodeName;
-    let nextElem;
-    do {
-        nextElem = elem.nextSibling;
-        target.appendChild(elem);
-        elem = nextElem;
-    } while (nextElem !== null && nextElem.nodeName !== tagName);
-};
-
-// Populate the sidebar
-const populateSidebar = (converter) => {
-
-    // If the sidebar is already populated, we don't need to do anything
-    const sidebar = document.getElementById("sidebar");
-    if (sidebar.textContent) {
-
-        return;
-    }
-
-    // Check whether the front matter wants us to do anything with the sidebar
-    const frontmatter = converter.getMetadata();
-    if (frontmatter.sidebar) {
-
-        // Are we hiding the sidebar?
-        if (frontmatter.sidebar === "none") {
-
-            // Do nothing
-
-        // If we start with a hash, look in the content for something with that ID
-        } else if (frontmatter.sidebar.substr(0, 1) === "#") {
-
-            moveSection(frontmatter.sidebar.substr(1), sidebar);
-
-        // If it starts with a dot, it's a file we need to load
-        } else if (frontmatter.sidebar.substr(0, 1) === ".") {
-
-            const url = new URL(frontmatter.sidebar, location.href).toString() + "?raw";
-            fetch(url)
-                .then(response => response.text())
-                .then(markdown => converter.makeHtml(markdown))
-                .then(html => { sidebar.innerHTML = html; })
-                .catch(err => { sidebar.innerHTML = "<h2>Error</h2><p>" + err + "</p>"; });
-
-        // Anything else, put it directly into the sidebar as text
-        } else {
-
-            sidebar.textContent = frontmatter.sidebar;
-        }
-
-    // If the front matter doesn't specify any sidebar content, we will use the
-    // directory. We know that we are working with either a markdown or HTML
-    // file, so we just need to remove filename.md or filename.html from the
-    // end of the URL
-    } else {
-
-        const directory = location.href.replace(/\/[^\/.]*\.(md|html)/, "");
-        fetch(directory + "?raw")
-            .then(response => response.text())
-            .then(markdown => converter.makeHtml(increaseHeaderDepth(markdown)))
-            .then(html => { sidebar.innerHTML = html; });
-    }
-};
-
 // Make the sidebar toggle button work
 const initSidebarToggle = () => {
 
@@ -486,35 +268,12 @@ addEventListener("load", () => {
         setDarkMode();
     }
 
-    // We use showdown to do the markdown conversion
-    if (typeof showdown !== "undefined") {
-
-        // Set up the converter
-        const converter = new showdown.Converter();
-        converter.setOption("literalMidWordUnderscores", true);
-        converter.setOption("tables", true);
-        converter.setOption("tasklists", true);
-        converter.setOption("metadata", true);
-        converter.setOption("disableForced4SpacesIndentedSublists", true);
-        converter.setOption("ghCompatibleHeaderId", true);
-
-        // Do the markdown conversion
-        convertMarkdown(converter);
-
-        // Set up our sidebar
-        populateSidebar(converter);
-    }
+    // Dynamic content
+    addMarkdownEnhancements(converter);
 
     // Set up the button to slide the sidebar in and out
     initSidebarToggle();
 
     // Set up our menu
     initMenu();
-
-    // Look for any plugins we need to initialise
-    conversionComplete = true;
-    registeredPlugins.forEach(fn => {
-
-        fn();
-    });
 });
