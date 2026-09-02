@@ -2,12 +2,11 @@
  * Generate a static version of the site
  */
 
-const markdown = require("./markdown-handler");
 const fs = require("fs");
 const path = require("path");
 
-const jsdom = require("jsdom");
-const { JSDOM } = jsdom;
+const convertMarkdown = require("./markdown");
+const getFileContent = require("./file-loader");
 
 // Check the user has passed in a source and target directory
 if (process.argv.length !== 4 && process.argv.length !== 5) {
@@ -30,49 +29,58 @@ if (!fs.existsSync(sourceRoot)) {
     console.error("Error: " + sourceRoot + " directory does not exist");
     process.exit(1);
 }
+
 if (!fs.existsSync(targetRoot)) {
 
     console.error("Info: Creating " + targetRoot);
     fs.mkdirSync(targetRoot);
 }
 
-// A fetch function to be used by jsdom
-const fetchFactory = (sourceUrl, targetFile, depth) => {
+/*
+ * Tidy up directory listings
+ */
+const processDirectoryListing = (content, sourceUrl) => {
 
-    return url => {
+    // Modify the links because they use a full path
+    const linkRegex = new RegExp('<a href="[^"]*/', "g");
+    content = content.replace(linkRegex, '<a href="./');
 
-        // Check we have what we expect
-        if (url.substr(0, 7) !== "file://") {
+    // Also remove the source root from the directory headings and title
+    const mdHeadingRegex = new RegExp("<h1>/" + sourceRoot, "g");
+    content = content.replace(mdHeadingRegex, "<h1>");
 
-            console.log("FETCH ERROR: Protocol is not file: " + url);
-            return Promise.resolve({ text: () => null });
-        }
-
-        // Get the file name
-        const filepath = url.substr(7);
-
-        // Because we are operating on the generated file, our path will
-        // include the target directory, but we need it to include the source
-        // directory, so we swap in the source
-        const sourceFilepath = filepath
-                                .replace("/" + targetRoot, "/" + sourceRoot)
-                                .replace(pwd, "");
-
-        // Make the call to get the file
-        return new Promise(resolver => {
-
-            // We use our markdown function to get the file contents, then we pass
-            // the result back through our promise fulfillment
-            markdown(sourceFilepath, pwd,
-                     resultWriterToCallback(result => resolver({ text: () => result }),
-                                            sourceFilepath, "/dummy_target/_index_md.html", depth),
-                     () => null);
-        });
-    };
+    return content;
 };
 
-// Process an output file
-const processOutputFile = (content, sourceUrl, targetFile, depth) => {
+/*
+ * Update links to reflect the static structure
+ */
+const fixFileReferences = (content, depth) => {
+
+    let prefix = ".";
+    if (depth > 0) {
+
+        prefix = Array(depth).fill("..").join("/");
+    }
+
+    // Fix up system links in HTML tags
+    content = content.replace(/(src|href)="\/system\//g, "$1=\"" + prefix + "/system/");
+    content = content.replace(/(src|href)="\/plugins\//g, "$1=\"" + prefix + "/plugins/");
+
+    // Update any links to *.md to be *_md.html
+    content = content.replace(/\.md/g, "_md.html");
+
+    // Assume that a link ending with a slash is a directory, so add a
+    // link to the directory listing file
+    content = content.replace(/\/"/g, '/_index_md.html"');
+
+    return content;
+};
+
+/*
+ * Copy a markdown file from source to destination
+ */
+const copyMarkdownFile = (sourceFile, targetFile, rootDir, depth) => {
 
     // Give markdown files html filenames
     if (/\.md$/.test(targetFile)) {
@@ -82,167 +90,24 @@ const processOutputFile = (content, sourceUrl, targetFile, depth) => {
     }
 
     // If the source url has a query string, remove it
-    sourceUrl = sourceUrl.replace(/\?.*/, "");
+    sourceFile = sourceFile.replace(/\?.*/, "");
+
+    // Get the markdown for the file
+    let sourceMarkdown = getFileContent(sourceFile, rootDir);
+
+    // Generate the HTML
+    let sourceHtml = convertMarkdown(sourceMarkdown, sourceFile, sourceFile, rootDir);
 
     // If it's a directory listing, we need to tweak it slightly
     if (/\/_index_md\.html$/.test(targetFile)) {
 
-        // Modify the links because they use a full path
-        const linkRegex = new RegExp("]\\(" + sourceUrl, "g");
-        content = content.replace(linkRegex, "](.");
-
-        // Also remove the source root from the directory headings and title
-        const mdHeadingRegex = new RegExp("# /" + sourceRoot, "g");
-        const h1Regex = new RegExp("<h1>/" + sourceRoot, "g");
-        const titleRegex = new RegExp("<title>/" + sourceRoot, "g");
-        if ("/" + sourceRoot === sourceUrl) {
-
-            content = content.replace(mdHeadingRegex, "# /");
-            content = content.replace(h1Regex, "<h1>/");
-            content = content.replace(titleRegex, "<title>/");
-        } else {
-
-            content = content.replace(mdHeadingRegex, "#");
-            content = content.replace(h1Regex, "<h1>");
-            content = content.replace(titleRegex, "<title>");
-        }
+        sourceHtml = processDirectoryListing(sourceHtml, sourceFile);
     }
 
     // Fix references to other files
-    if (/\.html$/.test(targetFile)) {
+    sourceHtml = fixFileReferences(sourceHtml, depth);
 
-        let prefix = ".";
-        if (depth > 0) {
-
-            prefix = Array(depth).fill("..").join("/");
-        }
-
-        // Fix up system links in HTML tags
-        content = content.replace(/(src|href)="\/system\//g, "$1=\"" + prefix + "/system/");
-
-        // We may also have system icons in our markdown
-        content = content.replace(/]\(\/system\/icons\//g, "](" + prefix + "/system/icons/");
-
-        // We also need to take care of system and plugin links (in frontmatter)
-        content = content.replace(/ \/plugins\//g, " " + prefix + "/plugins/");
-        content = content.replace(/ \/system\/plugins\//g, " " + prefix + "/system/plugins/");
-
-        // Update any links to *.md to be *_md.html
-        content = content.replace(/\.md\)/g, "_md.html)");
-
-        // Assume that a link ending with a slash is a directory, so add a
-        // link to the directory listing file
-        content = content.replace(/\/\)/g, "/_index_md.html)");
-    }
-
-    return { content, file: targetFile };
-};
-
-// Save the processed output file
-const saveOutputFile = (content, sourceUrl, targetFile, depth) => {
-
-    // Use JSDOM to replace the markdown with HTML
-    const dom = new JSDOM(content, {
-        url: "file://" + path.resolve(targetFile),
-        resources: "usable",
-        runScripts: "dangerously"
-    });
-    dom.window.fetch = fetchFactory(sourceUrl, targetFile, depth);
-
-    // Wait for JSDOM to load the documents
-    dom.window.document.addEventListener("DOMContentLoaded", e => {
-
-        // Give some time for scripts to execute (NEED A BETTER WAY TO DO THIS)
-        setTimeout(() => {
-
-            // Remove any scripts we don't need
-            [...dom.window.document.scripts].forEach(script => {
-
-                if (/\/system\/lib\/showdown\.min\.js$/.test(script.src)) {
-
-                    script.remove();
-                }
-            });
-
-            // Write the file
-            fs.writeFileSync(targetFile, dom.serialize());
-        }, 1000);
-    });
-};
-
-// Function for creating the response for a result writer
-// The variable "endFunction" is the function which gets called once the
-// response is complete, and gets passed the result
-const resultWriter = endFunction => {
-
-    let result = "";
-
-    return {
-        statusCode: 200,
-        statusMessage: "Success",
-        setHeader: () => {},
-        write: content => { result = result + content; },
-        end: () => { endFunction(result); result = ""; }
-    };
-};
-
-// Function to write the result from the markdown middleware
-const resultWriterToFile = (sourceUrl, targetFile, depth) => {
-
-    return resultWriter(result => {
-
-        const { content, file } = processOutputFile(result, sourceUrl, targetFile, depth);
-        saveOutputFile(content, sourceUrl, file, depth);
-        
-    });
-};
-
-// Function to return the result from markdown middleware as a string
-const resultWriterToCallback = (callbackFn, sourceUrl, targetFile, depth) => {
-
-    return resultWriter(result => {
-
-        const { content, file } = processOutputFile(result, sourceUrl, targetFile, depth);
-        callbackFn(content);
-    });
-};
-
-// Function to just copy a file across
-const fileCopier = (sourceFile, targetFile) => {
-
-    return () => {
-
-        fs.copyFileSync(sourceFile, targetFile);
-    };
-};
-
-// Copy a directory across
-const generateDirectory = (source, target, depth = 0) => {
-
-    const files = fs.readdirSync(source, { withFileTypes: true });
-    files.forEach(file => {
-
-        const sourceFile = file.parentPath + path.sep + file.name;
-        const sourceUrl = "/" + sourceFile;
-        const targetFile = target + path.sep + file.name;
-        if (fs.lstatSync(sourceFile).isDirectory()) {
-
-            // If we don't have the target directory, create it
-            if (!fs.existsSync(targetFile)) {
-
-                fs.mkdirSync(targetFile);
-            }
-
-            // Generate an index file for the directory
-            markdown(sourceUrl, pwd, resultWriterToFile(sourceUrl, targetFile + "/_index.md", depth + 1), () => null);
-
-            // Copy over the directory contents
-            generateDirectory(sourceFile, targetFile, depth + 1);
-        } else {
-
-            markdown(sourceUrl, pwd, resultWriterToFile(sourceUrl, targetFile, depth), fileCopier(sourceFile, targetFile));
-        }
-    });
+    fs.writeFileSync(targetFile, sourceHtml);
 };
 
 // Create any system files
@@ -278,6 +143,50 @@ const createSystemFiles = (targetDir, pluginDir) => {
     });
 };
 
-markdown(path.sep + sourceRoot, pwd, resultWriterToFile("/" + sourceRoot, "." + path.sep + targetRoot + path.sep + "_index.md", 0), () => null);
-generateDirectory(sourceRoot, targetRoot);
+/*
+ * Copy a directory across
+ */
+const generateDirectory = (source, target, rootDir, depth = 0) => {
+
+    const files = fs.readdirSync(source, { withFileTypes: true });
+    files.forEach(file => {
+
+        const sourceFile = file.parentPath + path.sep + file.name;
+        const sourceUrl = "/" + sourceFile;
+        const targetFile = target + path.sep + file.name;
+
+        // Handle directories
+        if (fs.lstatSync(sourceFile).isDirectory()) {
+
+            // If we don't have the target directory, create it
+            if (!fs.existsSync(targetFile)) {
+
+                fs.mkdirSync(targetFile);
+            }
+
+            // Generate an index file for the directory
+            copyMarkdownFile(sourceFile, targetFile + path.sep + "_index.md", rootDir, depth + 1);
+
+            // Copy over the directory contents
+            generateDirectory(sourceFile, targetFile, rootDir, depth + 1);
+
+        // Convert markdown files
+        } else if (/\.md$/.test(file.name)) {
+
+            copyMarkdownFile(sourceFile, targetFile, rootDir, depth);
+
+        // HTML files need a little tweaking
+        } else if (/\.html$/.test(file.name)) {
+
+            /* TBD */ fs.copyFileSync(sourceFile, targetFile);
+
+        // Any other files, just copy them across
+        } else {
+
+            fs.copyFileSync(sourceFile, targetFile);
+        }
+    });
+};
+
 createSystemFiles(targetRoot, pluginDir);
+generateDirectory(pwd + path.sep + sourceRoot, pwd + path.sep + targetRoot, pwd);

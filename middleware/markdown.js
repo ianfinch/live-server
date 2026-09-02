@@ -167,7 +167,7 @@ const markdownToHtml = (markdown, filepath, rootDir) => {
 const convertMarkdown = (markdown, url, filepath, rootDir) => {
 
     let result = "";
-    const extension = url.ext.replace(/^\./, "");
+    const extension = url.ext ? url.ext.replace(/^\./, "") : "";
 
     let escapedContent = markdown.replace(/&/g, "&amp;")
                                  .replace(/</g, "&lt;")

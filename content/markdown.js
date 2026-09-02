@@ -286,4 +286,7 @@ addEventListener("load", () => {
 
     // Set up our menu
     initMenu();
+
+    // Publish an event to allow post-conversion activities
+    window.dispatchEvent(new Event("markdownConverted"));
 });

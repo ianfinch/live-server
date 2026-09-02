@@ -1,5 +1,5 @@
 /**
- * Middleware so I can use non-web files from live-server
+ * Middleware so I can use markdown files from live-server
  */
 
 const handler = require("./orchestrator");
