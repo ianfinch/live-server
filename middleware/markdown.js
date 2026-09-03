@@ -169,13 +169,9 @@ const convertMarkdown = (markdown, url, filepath, rootDir) => {
     let result = "";
     const extension = url.ext ? url.ext.replace(/^\./, "") : "";
 
-    let escapedContent = markdown.replace(/&/g, "&amp;")
-                                 .replace(/</g, "&lt;")
-                                 .replace(/>/g, "&gt;");
-
     // If we don't have a final newline, add one
-    if (escapedContent.substr(-1) !== "\n") {
-        escapedContent = escapedContent + "\n";
+    if (markdown.substr(-1) !== "\n") {
+        markdown = markdown + "\n";
     }
 
     // Take the first heading as the page title (or use the file path)
@@ -191,21 +187,21 @@ const convertMarkdown = (markdown, url, filepath, rootDir) => {
     }
 
     // If it's markdown, we've done what we need
-    if (extension === "md" || /^# [^# ]/.test(escapedContent) || /^---/.test(escapedContent)) {
-        result = result + escapedContent;
+    if (extension === "md" || /^# [^# ]/.test(markdown) || /^---/.test(markdown)) {
+        result = result + markdown;
 
     // Mermaid diagram we use mermaid formatting
     } else if (extension === "mmd") {
 
         result = result + "```mermaid\n";
-        result = result + escapedContent;
+        result = result + markdown;
         result = result + "```\n";
 
     // Anything else we display as text
     } else {
 
         result = result + "```\n";
-        result = result + escapedContent;
+        result = result + markdown;
         result = result + "```\n";
     }
 

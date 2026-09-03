@@ -39,15 +39,33 @@ if (!fs.existsSync(targetRoot)) {
 /*
  * Tidy up directory listings
  */
-const processDirectoryListing = (content, sourceUrl) => {
+const processDirectoryListing = (content, sourceUrl, heading = "h1") => {
 
     // Modify the links because they use a full path
-    const linkRegex = new RegExp('<a href="[^"]*/', "g");
-    content = content.replace(linkRegex, '<a href="./');
+    const dirpath = sourceUrl.replace(pwd, "");
+    const linkRegex = new RegExp('href="' + dirpath, "g");
+    content = content.replace(linkRegex, 'href=".');
 
     // Also remove the source root from the directory headings and title
-    const mdHeadingRegex = new RegExp("<h1>/" + sourceRoot, "g");
-    content = content.replace(mdHeadingRegex, "<h1>");
+    const mdHeadingRegex = new RegExp("(<" + heading + "[^>]*>)/" + sourceRoot, "g");
+    content = content.replace(mdHeadingRegex, "$1");
+
+    return content;
+};
+
+/*
+ * Find the sidebar and fix any directory links in there
+ */
+const fixSidebarListing = (content, sourceFile) => {
+
+    const sidebarRegex = new RegExp('<div id="sidebar">.*?</div>', "s");
+    const sidebarMatch = content.match(sidebarRegex);
+    if (sidebarMatch) {
+
+        const sidebarContent = sidebarMatch[0];
+        const sourceDir = sourceFile.replace(/\/[^\/]*$/, "");
+        content = content.replace(sidebarContent, processDirectoryListing(sidebarContent, sourceDir, "h2"));
+    }
 
     return content;
 };
@@ -55,7 +73,7 @@ const processDirectoryListing = (content, sourceUrl) => {
 /*
  * Update links to reflect the static structure
  */
-const fixFileReferences = (content, depth) => {
+const fixFileReferences = (content, sourceFile, depth) => {
 
     let prefix = ".";
     if (depth > 0) {
@@ -66,6 +84,10 @@ const fixFileReferences = (content, depth) => {
     // Fix up system links in HTML tags
     content = content.replace(/(src|href)="\/system\//g, "$1=\"" + prefix + "/system/");
     content = content.replace(/(src|href)="\/plugins\//g, "$1=\"" + prefix + "/plugins/");
+
+    // We may have a directory listing in the sidebar, so we need to fix links
+    // in that too
+    content = fixSidebarListing(content, sourceFile);
 
     // Update any links to *.md to be *_md.html
     content = content.replace(/\.md/g, "_md.html");
@@ -105,7 +127,7 @@ const copyMarkdownFile = (sourceFile, targetFile, rootDir, depth) => {
     }
 
     // Fix references to other files
-    sourceHtml = fixFileReferences(sourceHtml, depth);
+    sourceHtml = fixFileReferences(sourceHtml, sourceFile, depth);
 
     fs.writeFileSync(targetFile, sourceHtml);
 };
