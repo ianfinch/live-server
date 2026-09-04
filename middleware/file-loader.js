@@ -3,6 +3,14 @@ const fs = require("fs");
 const path = require("node:path");
 const iconsDir = __dirname.replace(path.sep + "middleware", path.sep + "icons");
 
+// Binary file types
+const binaryFiles = [
+    "gif",
+    "ico",
+    "jpg",
+    "png"
+];
+
 // Work out which icon to use for a file
 const getIcon = file => {
 
@@ -81,7 +89,8 @@ const getFileContent = (filepath, rootDir, options) => {
     }
 
     // Check for a binary file
-    if (options && options.binary) {
+    const extn = path.parse(filepath).ext.replace(/^\./, "");
+    if (binaryFiles.includes(extn)) {
 
         return fs.readFileSync(filepath, { flag: "r" });
     }

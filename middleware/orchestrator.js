@@ -31,6 +31,7 @@ const mime = {
     html: "text/html",
     js:   "text/javascript",
     mjs:  "text/javascript",
+    png:  "image/png",
     svg:  "image/svg+xml"
 };
 
@@ -70,7 +71,7 @@ module.exports = function(url, rootDir, res, next) {
     // Check for favicon
     if (url === "/favicon.ico") {
         const filepath = systemDir + path.sep + "content" + path.sep + "favicon.ico";
-        writeContent(getFileContent(filepath, rootDir, { binary: true }), res);
+        writeContent(getFileContent(filepath, rootDir), res);
         return;
     }
 
