@@ -118,7 +118,8 @@ const copyMarkdownFile = (sourceFile, targetFile, rootDir, depth) => {
     let sourceMarkdown = getFileContent(sourceFile, rootDir);
 
     // Generate the HTML
-    let sourceHtml = convertMarkdown(sourceMarkdown, sourceFile, sourceFile, rootDir);
+    const url = sourceFile.replace(rootDir, "").replace("/" + sourceRoot, "");
+    let sourceHtml = convertMarkdown(sourceMarkdown, path.parse(url), sourceFile, rootDir);
 
     // If it's a directory listing, we need to tweak it slightly
     if (/\/_index_md\.html$/.test(targetFile)) {

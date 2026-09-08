@@ -55,14 +55,13 @@ module.exports = function(url, rootDir, res, next) {
     const extension = parsedUrl.ext.replace(/^\./, "");
 
     // Check whether this is a system file or the plugins directory
-    if (/^\/system\//.test(url) || /^\/plugins\//.test(url)) {
+    if (/^\/system\//.test(url)) {
 
         let filepath = url;
         filepath = filepath.replace(/^\/system\/lib\//, systemDir + path.sep + "lib" + path.sep);
         filepath = filepath.replace(/^\/system\/content\//, systemDir + path.sep + "content" + path.sep);
         filepath = filepath.replace(/^\/system\/icons\//, systemDir + path.sep + "icons" + path.sep);
         filepath = filepath.replace(/^\/system\/plugins\//, systemDir + path.sep + "plugins" + path.sep);
-        filepath = filepath.replace(/^\/plugins\//, rootDir + path.sep + "plugins" + path.sep);
         res.setHeader("Content-Type", mime[extension] || "text/plain");
         writeContent(getFileContent(filepath, rootDir), res);
         return;
