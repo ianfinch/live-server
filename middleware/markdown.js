@@ -158,7 +158,7 @@ const markdownToHtml = (markdown, filepath, rootDir) => {
     let sidebar;
     [ body, sidebar ] = createSidebarContent(body, frontmatter, filepath, rootDir);
 
-    return [ header, body, sidebar ];
+    return [ header, body, sidebar, frontmatter ];
 };
 
 /*
@@ -188,7 +188,10 @@ const convertMarkdown = (markdown, url, filepath, rootDir) => {
 
     // If it's markdown, we've done what we need
     if (extension === "md" || /^# [^# ]/.test(markdown) || /^---/.test(markdown)) {
-        result = result + markdown;
+
+        // We remove the top level heading because we're going to add it to the
+        // top of the page a bit later in this function
+        result = result + markdown.replace(titleRegex, "");
 
     // Mermaid diagram we use mermaid formatting
     } else if (extension === "mmd") {
@@ -206,7 +209,13 @@ const convertMarkdown = (markdown, url, filepath, rootDir) => {
     }
 
     // Convert the markdown to HTML
-    [ header, result, sidebar ] = markdownToHtml(result, filepath, rootDir);
+    [ header, result, sidebar, frontmatter ] = markdownToHtml(result, filepath, rootDir);
+
+    // The frontmatter can override the page title
+    if (frontmatter.title) {
+
+        pageTitle = frontmatter.title;
+    }
 
     // Assemble the full page
     let htmlPreamble = html[0].replace(/<!-- TITLE -->/g, pageTitle);

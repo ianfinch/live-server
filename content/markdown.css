@@ -236,11 +236,6 @@ body {
     position: relative;
 }
 
-/* Hide the first heading in the article, because we have duplicated it as the page title */
-article > h1:first-child {
-    display: none;
-}
-
 /* Mask for when we display a modal */
 div#mask {
     background: #000000cc;
