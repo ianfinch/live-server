@@ -265,6 +265,11 @@ article {
     border-radius: 16px;
 }
 
+/* If the article doesn't have a level 2 heading, add some extra space */
+article:not(:has(h2:first-child)) {
+    padding-top: 2em;
+}
+
 /* Special case, the article only contains a single pre block (typically from a text-based file) */
 body:has(> article > pre:only-child) {
     background: var( --text-file-bg );
