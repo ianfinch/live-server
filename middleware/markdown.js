@@ -83,7 +83,7 @@ const findSectionToMove = (content, id) => {
     // Now search for that tag plus the content from there up to the next
     // occurrence of the same tag
     const tag = idMatch[0].split(" ")[0].substr(1);
-    const sectionRegex = new RegExp('<' + tag + ' [^<>]*id="' + id + '.*?(?=<' + tag + ')', "s");
+    const sectionRegex = new RegExp('<' + tag + ' [^<>]*id="' + id + '.*?(?=<(' + tag + '|\/article))', "s");
     const sectionMatch = content.match(sectionRegex);
     if (!sectionMatch) {
 

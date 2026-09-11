@@ -184,15 +184,18 @@ body {
     padding: 72px 0 16px 32px;
 }
 
-#sidebar h2 {
+#sidebar h2, #sidebar h3 {
     font-family: "Questrial", sans-serif;
     font-weight: bold;
     font-size: 18px;
     line-height: 28px;
-    background: var( --table-header-bg );
-    color: var( --table-header-fg );
     padding-left: 8px;
     border-radius: 4px;
+}
+
+#sidebar h2 {
+    background: var( --table-header-bg );
+    color: var( --table-header-fg );
 }
 
 #sidebar-toggle {
