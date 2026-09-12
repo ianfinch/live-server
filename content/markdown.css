@@ -8,7 +8,7 @@
     --article-bg: #fefefe;
     --article-fg: var( --body-fg );
     --article-fg-strong: #000017;
-    --article-border: #d0d0d0;
+    --article-border: #b0b0b0;
     --heading-fg: var( --article-fg );
     --pre-bg: rgb(245, 245, 245);
     --pre-fg: rgb(54, 70, 78);
@@ -89,7 +89,7 @@
 @media only screen and (max-width: 1155px) and (min-width: 875px) {
 
     .content {
-        padding-left: calc((100vw - var( --article-width ) - var( --article-padding-right ) - var( --article-padding-left )) / 2);
+        padding-left: calc((100vw - var( --article-width ) + var( --sidebar-protruding )) / 2) !important;
     }
 
     #sidebar-container {
@@ -116,10 +116,6 @@
         left: calc( -1 * var( --sidebar-width ) - var( --sidebar-buffer ) + var( --sidebar-protruding ));
         animation-name: sidebar-close;
         animation-duration: 0.5s;
-    }
-
-    #sidebar-container.visible #sidebar-toggle {
-        right: 16px;
     }
 
     #sidebar {
@@ -181,7 +177,7 @@ body {
 /* The sidebar for navigation and directory listings */
 #sidebar {
     width: var( --sidebar-width );
-    padding: 72px 0 16px 32px;
+    padding: 24px 0 16px 16px;
 }
 
 #sidebar h2, #sidebar h3 {
@@ -200,15 +196,27 @@ body {
 
 #sidebar-toggle {
     position: absolute;
-    top: 4px;
-    right: 1px;
-    border: none;
+    top: 8px;
+    right: -8px;
     background: var( --sidebar-bg );
+    border: none;
     color: var( --body-fg );
-    padding: 0px;
+    padding: 0 2px 0 0;
     font-size: 14px;
-    line-height: 32px;
+    line-height: 28px;
     cursor: pointer;
+}
+
+#sidebar-toggle::before {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 28px;
+    top: -1px;
+    right: -1px;
+    border-style: solid;
+    border-width: 1px 1px 1px 0;
+    border-color: var( --article-border );
 }
 
 /* Hide the sidebar if it has nothing in it */
