@@ -187,7 +187,8 @@ const convertMarkdown = (markdown, url, filepath, rootDir) => {
     }
 
     // If it's markdown, we've done what we need
-    if (extension === "md" || /^# [^# ]/.test(markdown) || /^---/.test(markdown)) {
+    if (extension === "md" || 
+        (!extension && (/^# [^# ]/.test(markdown) || /^---/.test(markdown)))) {
 
         // We remove the top level heading because we're going to add it to the
         // top of the page a bit later in this function

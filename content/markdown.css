@@ -467,6 +467,11 @@ pre:has(> code.mermaid) {
     cursor: zoom-in;
 }
 
+/* Handle mermaid in dark mode */
+.dark-mode code.mermaid .edge { stroke: white !important; }
+.dark-mode code.mermaid .arrow { fill: white !important; }
+.dark-mode code.mermaid tspan { fill: white !important; }
+
 /* Allow items to be expanded */
 p:has(> img.expanded:only-child),
 pre.expanded:has(> code.mermaid) {
