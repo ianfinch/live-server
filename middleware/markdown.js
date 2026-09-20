@@ -115,9 +115,19 @@ const createSidebarContent = (bodyContent, frontmatter, filepath, rootDir) => {
         // If it starts with a dot, it's a file we need to load
         } else if (frontmatter.sidebar.substr(0, 1) === ".") {
 
-            // We only need to do basic markdown conversion
+            // Get the sidebar contents
             const sidebarFile = path.resolve(path.dirname(filepath), frontmatter.sidebar);
-            sidebarContent = converter.makeHtml(getFileContent(sidebarFile, rootDir));
+            let sidebarMarkdown = getFileContent(sidebarFile, rootDir);
+
+            // Adjust any links if the sidebar content is in a different directory
+            const sidebarPrefix = frontmatter.sidebar.replace(/[^\/]*$/, "");
+            if (sidebarPrefix !== "./") {
+
+                sidebarMarkdown = sidebarMarkdown.replace(/]\(/g, "](" + sidebarPrefix);
+            }
+
+            // We only need to do basic markdown conversion
+            sidebarContent = converter.makeHtml(sidebarMarkdown);
 
         // Anything else, put it directly into the sidebar as text
         } else {

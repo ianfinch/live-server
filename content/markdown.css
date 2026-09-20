@@ -18,8 +18,8 @@
     --success-fg: #006100;
     --warning-bg: #ffeb9c;
     --warning-fg:#9c5700;
-    --failure-bg: #ffc7ce;
-    --failure-fg:#9c0006;
+    --error-bg: #ffc7ce;
+    --error-fg:#9c0006;
     --border-bg: #d7d7d7;
     --table-header-bg: #ccc;
     --table-header-fg: var( --heading-fg );
