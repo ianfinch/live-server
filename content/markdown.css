@@ -321,7 +321,7 @@ code {
     line-height: 14px;
 }
 
-p code, li code {
+p > code, li > code {
     background: var( --pre-bg );
     color: var( --pre-fg );
     border-radius: 4px;
@@ -333,7 +333,7 @@ p code, li code {
 pre {
     background: var( --pre-bg );
     color: var( --pre-fg );
-    padding: 0.5em 1em;
+    padding: 0.25em 0.75em;
     margin-bottom: 16px;
     max-width: calc( var( --article-width ) - 2 * 1em );
     overflow-x: auto;
