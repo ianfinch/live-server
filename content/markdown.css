@@ -10,8 +10,9 @@
     --article-fg-strong: #000017;
     --article-border: #b0b0b0;
     --heading-fg: var( --article-fg );
-    --pre-bg: rgb(245, 245, 245);
+    --pre-bg: #00000011;
     --pre-fg: rgb(54, 70, 78);
+    --mermaid-bg: #00000007;
     --link-fg: royalblue;
     --link-hover-fg: firebrick;
     --success-bg: #c6efce;
@@ -48,8 +49,9 @@
     --link-hover-fg: rgb(255, 153, 195);
     --article-fg-strong: #fff;
     --article-border: #506070;
-    --pre-bg: #42444d;
+    --pre-bg: #ffffff11;
     --pre-fg: rgb(232, 232, 232);
+    --mermaid-bg: #ffffff07;
     --border-bg: #979797;
     --table-header-bg: #2aa198;
     --sidebar-bg: #003c47;
@@ -462,7 +464,7 @@ blockquote {
 
 /* Mermaid diagrams we want a plain background */
 pre:has(> code.mermaid) {
-    background: var( --article-bg );
+    background: var( --mermaid-bg );
     border: 1px solid var( --border-bg );
     cursor: zoom-in;
 }
