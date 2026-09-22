@@ -7,7 +7,7 @@
     --article-padding-right: 32px;
     --article-bg: #fefefe;
     --article-fg: var( --body-fg );
-    --article-fg-strong: #000017;
+    --article-fg-strong: #b58900;
     --article-border: #b0b0b0;
     --heading-fg: var( --article-fg );
     --pre-bg: #00000011;
@@ -47,7 +47,6 @@
     --article-bg: #203040;
     --link-fg: rgb(153, 195, 255);
     --link-hover-fg: rgb(255, 153, 195);
-    --article-fg-strong: #fff;
     --article-border: #506070;
     --pre-bg: #ffffff11;
     --pre-fg: rgb(232, 232, 232);
