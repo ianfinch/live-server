@@ -9,7 +9,7 @@
     --article-fg: var( --body-fg );
     --article-fg-strong: #b58900;
     --article-border: #b0b0b0;
-    --heading-fg: var( --article-fg );
+    --heading-fg: var( --article-fg-strong );
     --pre-bg: #00000011;
     --pre-fg: rgb(54, 70, 78);
     --mermaid-bg: #00000007;
@@ -23,7 +23,7 @@
     --error-fg:#9c0006;
     --border-bg: #d7d7d7;
     --table-header-bg: #ccc;
-    --table-header-fg: var( --heading-fg );
+    --table-header-fg: var( --article-fg );
     --text-file-bg: #002b36;
     --text-file-fg: #93a1a1;
     --text-file-font-size: 12px;
